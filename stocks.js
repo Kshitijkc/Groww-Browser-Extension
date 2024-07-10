@@ -1,14 +1,15 @@
 let mainDiv = null;
+let holdingDetails = null;
 let ltpElement = null;
 let highElement = null;
 let rowElement = null;
 let performanceLtpHigh = null;
 let performanceLtpHighValue = null;
 
-let makeElementSticky = (element) => {
+let makeElementSticky = (element, top, zIndex) => {
     element.style.position = 'sticky';
-    element.style.top = '30px';
-    element.style.zIndex = "5";
+    element.style.top = top;
+    element.style.zIndex = zIndex;
     element.style.backgroundColor = "rgba(18, 18, 18, 0.85)";
 }
 
@@ -25,6 +26,9 @@ let addPerformanceElement = (rootElement, className, name, value) => {
 let initializeElements = () => {
     if (!mainDiv) {
         mainDiv = document.querySelector('div.lpu38MainDiv');
+    }
+    if (!holdingDetails) {
+        holdingDetails = document.getElementsByClassName('yh878ContentDiv backgroundPrimary borderPrimary')[0];
     }
     if (!ltpElement) {
         ltpElement = document.getElementsByClassName('lpu38San')[0].nextElementSibling;
@@ -89,7 +93,8 @@ const handleChange = (mutationsList, observer) => {
 
 let main = () => {
     initializeElements();
-    makeElementSticky(mainDiv);
+    makeElementSticky(mainDiv, '30px', '5');
+    makeElementSticky(holdingDetails, '40px', '4');
     addPerformance();
     
     const observer = new MutationObserver(handleChange);
