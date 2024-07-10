@@ -97,4 +97,4 @@ let main = () => {
     observer.observe(ltpElement, config);
 }
 
-setTimeout(main, 1000);
+setTimeout(main, 2000);
