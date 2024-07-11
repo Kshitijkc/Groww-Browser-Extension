@@ -93,8 +93,12 @@ const handleChange = (mutationsList, observer) => {
 
 let main = () => {
     initializeElements();
-    makeElementSticky(mainDiv, '30px', '5');
-    makeElementSticky(holdingDetails, '40px', '4');
+    if (mainDiv) {
+        makeElementSticky(mainDiv, '30px', '5');
+    }
+    if (holdingDetails) {
+        makeElementSticky(holdingDetails, '40px', '4');
+    }
     addPerformance();
     
     const observer = new MutationObserver(handleChange);
