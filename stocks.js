@@ -91,6 +91,23 @@ const handleChange = (mutationsList, observer) => {
     }
 };
 
+// scroll into view
+const scrollIntoView = () => {
+    // Select the h2 element with the specified class
+    const headingElement = document.querySelector("div.stkP12TabsDiv.bodyXLargeHeavy");
+
+    // Check if the element exists
+    if (headingElement) {
+        // Scroll the element into view
+        headingElement.scrollIntoView({
+            behavior: 'smooth', // Optional: for smooth scrolling
+            block: 'start' // Optional: align to the top of the view
+        });
+    } else {
+        console.log("Element not found");
+    }
+}
+
 let main = () => {
     initializeElements();
     if (mainDiv) {
@@ -100,6 +117,7 @@ let main = () => {
         makeElementSticky(holdingDetails, '40px', '4');
     }
     addPerformance();
+    scrollIntoView();
     
     const observer = new MutationObserver(handleChange);
     const config = { childList: true, subtree: true, characterData: true };
