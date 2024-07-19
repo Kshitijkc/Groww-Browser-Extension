@@ -122,9 +122,9 @@ let main = () => {
     const observer = new MutationObserver(handleChange);
     const config = { childList: true, subtree: true, characterData: true };
     observer.observe(ltpElement, config);
-    setTimeout(() => {
-        location.reload(true);
-    }, 15000);
+    // setTimeout(() => {
+    //     location.reload(true);
+    // }, 15000);
 }
 
 setTimeout(main, 2000);
