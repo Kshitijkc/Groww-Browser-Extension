@@ -2,6 +2,8 @@ let mainDiv = null;
 let holdingDetails = null;
 let ltpElement = null;
 let highElement = null;
+let closeElement = null;
+let upperElement = null;
 let rowElement = null;
 let performanceLtpHigh = null;
 let performanceLtpHighValue = null;
@@ -39,6 +41,12 @@ let initializeElements = () => {
             highElement = highElementParent.querySelector('span');
         }
     }
+    if (!closeElement) {
+        closeElement = document.getElementsByClassName('stockPerformance_value__g7yez bodyLargeHeavy')[1];
+    }
+    if (!upperElement) {
+        upperElement = document.getElementsByClassName('stockPerformance_value__g7yez bodyLargeHeavy')[4];
+    }
     if (!rowElement) {
         const dividerElement = document.querySelector('.stockPerformance_dividerHz__hL82_');
         if (dividerElement) {
@@ -56,11 +64,12 @@ let initializeElements = () => {
     }
 }
 
-let addPerformanceLtpHigh = () => {
+let addPerformance = () => {
+    let className = 'extension performance ltp-high';
     if (highElement) {
-        var highValue = parseFloat(highElement.textContent);
-        var ltpValue = parseFloat(ltpElement.textContent);
-        var ltpHighPercentageDiff = (((highValue - ltpValue) / ltpValue) * 100).toFixed(2);
+        let highValue = parseFloat(highElement.textContent);
+        let ltpValue = parseFloat(ltpElement.textContent);
+        let ltpHighPercentageDiff = (((highValue - ltpValue) / ltpValue) * 100).toFixed(2);
 
         if (rowElement) {
             if (performanceLtpHigh) {
@@ -68,17 +77,20 @@ let addPerformanceLtpHigh = () => {
                     performanceLtpHighValue.textContent = ltpHighPercentageDiff;
                 }
             } else {
-                var className = 'extension performance ltp-high';
                 addPerformanceElement(rowElement, className, 'LTP-HIGH diff(%)', ltpHighPercentageDiff);
             }
         } else {
             console.log('No div with class "row" found next to the divider.');
         }
     }
-}
 
-let addPerformance = () => {
-    addPerformanceLtpHigh();
+    let closeValue = parseFloat(closeElement.textContent);
+    let upperValue = parseFloat(upperElement.textContent);
+    let maxDiffPercentage = (((upperValue - closeValue) / closeValue) * 100).toFixed(2);
+
+    if (rowElement) {
+        addPerformanceElement(rowElement, className, 'Max Diff(%)', maxDiffPercentage);
+    }
 }
 
 // Create a callback function to handle changes
