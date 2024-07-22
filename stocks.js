@@ -64,8 +64,8 @@ let initializeElements = () => {
     }
 }
 
-let addPerformance = () => {
-    let className = 'extension performance ltp-high';
+let addPerformanceOnLtpChange = () => {
+    let className = 'extension performance';
     if (highElement) {
         let highValue = parseFloat(highElement.textContent);
         let ltpValue = parseFloat(ltpElement.textContent);
@@ -77,19 +77,22 @@ let addPerformance = () => {
                     performanceLtpHighValue.textContent = ltpHighPercentageDiff;
                 }
             } else {
-                addPerformanceElement(rowElement, className, 'LTP-HIGH diff(%)', ltpHighPercentageDiff);
+                addPerformanceElement(rowElement, className + ' ltp-high', 'LTP-HIGH diff(%)', ltpHighPercentageDiff);
             }
         } else {
             console.log('No div with class "row" found next to the divider.');
         }
     }
+}
 
+let addPerformance = () => {
+    let className = 'extension performance';
     let closeValue = parseFloat(closeElement.textContent);
     let upperValue = parseFloat(upperElement.textContent);
     let maxDiffPercentage = (((upperValue - closeValue) / closeValue) * 100).toFixed(2);
 
     if (rowElement) {
-        addPerformanceElement(rowElement, className, 'Max Diff(%)', maxDiffPercentage);
+        addPerformanceElement(rowElement, className + ' max-diff', 'Max Diff(%)', maxDiffPercentage);
     }
 }
 
@@ -98,7 +101,7 @@ const handleChange = (mutationsList, observer) => {
     for (let mutation of mutationsList) {
         if (mutation.type === 'characterData' || mutation.type === 'childList') {
             initializeElements();
-            addPerformance();
+            addPerformanceOnLtpChange();
         }
     }
 };
@@ -128,6 +131,7 @@ let main = () => {
     if (holdingDetails) {
         makeElementSticky(holdingDetails, '40px', '4');
     }
+    addPerformanceOnLtpChange();
     addPerformance();
     scrollIntoView();
     
