@@ -7,6 +7,8 @@ let upperElement = null;
 let rowElement = null;
 let performanceLtpHigh = null;
 let performanceLtpHighValue = null;
+let performanceQty = null;
+let performanceQtyValue = null;
 
 let makeElementSticky = (element, top, zIndex) => {
     element.style.position = 'sticky';
@@ -62,6 +64,12 @@ let initializeElements = () => {
     if (performanceLtpHigh && !performanceLtpHighValue) {
         performanceLtpHighValue = performanceLtpHigh.querySelector('.stockPerformance_value__g7yez');
     }
+    if (!performanceQty) {
+        performanceQty = document.querySelector('div.col.l3.extension.performance.qty');
+    }
+    if (performanceQty && !performanceQtyValue) {
+        performanceQtyValue = performanceQty.querySelector('.stockPerformance_value__g7yez');
+    }
 }
 
 let addPerformanceOnLtpChange = () => {
@@ -70,6 +78,8 @@ let addPerformanceOnLtpChange = () => {
         let highValue = parseFloat(highElement.textContent);
         let ltpValue = parseFloat(ltpElement.textContent);
         let ltpHighPercentageDiff = (((highValue - ltpValue) / ltpValue) * 100).toFixed(2);
+        let amount = 20000;
+        let qtyValue = parseInt(amount/ltpValue);
 
         if (rowElement) {
             if (performanceLtpHigh) {
@@ -78,6 +88,13 @@ let addPerformanceOnLtpChange = () => {
                 }
             } else {
                 addPerformanceElement(rowElement, className + ' ltp-high', 'LTP-HIGH diff(%)', ltpHighPercentageDiff);
+            }
+            if (performanceQty) {
+                if (performanceQtyValue) {
+                    performanceQtyValue.textContent = qtyValue;
+                }
+            } else {
+                addPerformanceElement(rowElement, className + ' qty', 'Quantity', qtyValue);
             }
         } else {
             console.log('No div with class "row" found next to the divider.');
