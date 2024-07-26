@@ -78,7 +78,7 @@ let addPerformanceOnLtpChange = () => {
         let highValue = parseFloat(highElement.textContent);
         let ltpValue = parseFloat(ltpElement.textContent);
         let ltpHighPercentageDiff = (((highValue - ltpValue) / ltpValue) * 100).toFixed(2);
-        let amount = 20000;
+        let amount = document.getElementById('inputAmount').value;
         let qtyValue = parseInt(amount/ltpValue);
 
         if (rowElement) {
@@ -140,6 +140,25 @@ const scrollIntoView = () => {
     }
 }
 
+const addInputFields = () => {
+    var newInput = document.createElement("input");
+    newInput.className = "buySellOrder_qtyinputbox__jMqei headingLarge";
+    newInput.id = "inputAmount";
+    newInput.type = "number";
+    newInput.min = "1";
+    newInput.value = "20000";
+    newInput.placeholder = "Amount"
+
+    // Add change event listener
+    newInput.addEventListener('input', (event) => {
+        initializeElements();
+        addPerformanceOnLtpChange();
+    });
+
+    let livePriceCard = document.getElementById('card-live-price');
+    livePriceCard.appendChild(newInput);
+}
+
 let main = () => {
     initializeElements();
     if (mainDiv) {
@@ -148,6 +167,7 @@ let main = () => {
     if (holdingDetails) {
         makeElementSticky(holdingDetails, '40px', '4');
     }
+    addInputFields();
     addPerformanceOnLtpChange();
     addPerformance();
     scrollIntoView();
@@ -160,4 +180,4 @@ let main = () => {
     // }, 15000);
 }
 
-setTimeout(main, 2000);
+setTimeout(main, 3000);
