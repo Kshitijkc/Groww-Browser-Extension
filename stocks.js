@@ -1,15 +1,24 @@
+// Define the regular expression pattern
+let pattern = /^https:\/\/groww\.in\/stocks\/[^\/]+$/;
+
+// Get the current URL
+let currentUrl = window.location.href;
+
+// Check if the current URL matches the pattern
+if (!pattern.test(currentUrl)) {
+    // If the URL does not match, exit further execution
+    throw new Error("URL does not match the pattern");
+}
+
 let mainDiv = null;
 let holdingDetails = null;
 let ltpElement = null;
 let highElement = null;
-let closeElement = null;
-let upperElement = null;
 let rowElement = null;
-let performanceLtpHigh = null;
 let performanceLtpHighValue = null;
-let performanceQty = null;
 let performanceQtyValue = null;
-let stockNameContainer = null;
+let namedElements = {};
+let stockLTPContainer = null;
 
 let makeElementSticky = (element, top, zIndex) => {
     element.style.position = 'sticky';
@@ -56,59 +65,65 @@ let initializeElements = () => {
             highElement = highElementParent.querySelector('span');
         }
     }
-    if (!closeElement) {
-        closeElement = document.getElementsByClassName('stockPerformance_value__g7yez bodyLargeHeavy')[1];
-    }
-    if (!upperElement) {
-        upperElement = document.getElementsByClassName('stockPerformance_value__g7yez bodyLargeHeavy')[4];
-    }
-    if (!rowElement) {
-        const dividerElement = document.querySelector('.stockPerformance_dividerHz__hL82_');
-        if (dividerElement) {
-            const nextSibling = dividerElement.nextElementSibling;
-            if (nextSibling && nextSibling.classList.contains('row')) {
-                rowElement = nextSibling;
-            }
+
+    // Find the parent element that contains the unique class 'stockPerformance_dividerHz__hL82_'
+    let parentElement = document.querySelector('.stockPerformance_dividerHz__hL82_').closest('.contentPrimary');
+    // Now get the specific row within this parent element
+    rowElement = parentElement.querySelector('.row');
+    // Get all divs with class 'col l3' within the found row
+    let colDivs = rowElement.querySelectorAll('.col.l3');
+    // Iterate over the colDivs and extract the key-value pairs
+    colDivs.forEach(div => {
+        // Get the key and value elements
+        let keyElement = div.querySelector('.stockPerformance_keyText__f0fuN');
+        let valueElement = div.querySelector('.stockPerformance_value__g7yez');
+    
+        // Store key-value pairs in the stockData object
+        if (keyElement && valueElement) {
+            let key = keyElement.textContent.trim();
+            let value = valueElement.textContent.trim();
+    
+            // Add the key-value pair to the stockData object
+            namedElements[key] = valueElement; // Store the reference to valueElement
         }
-    }
-    if (!performanceLtpHigh) {
-        performanceLtpHigh = document.querySelector('div.col.l3.extension.performance.ltp-high');
-    }
-    if (performanceLtpHigh && !performanceLtpHighValue) {
-        performanceLtpHighValue = performanceLtpHigh.querySelector('.stockPerformance_value__g7yez');
-    }
-    if (!performanceQty) {
-        performanceQty = document.querySelector('div.col.l3.extension.performance.qty');
-    }
-    if (performanceQty && !performanceQtyValue) {
-        performanceQtyValue = performanceQty.querySelector('.stockPerformance_value__g7yez');
-    }
-    if (!stockNameContainer) {
-        stockNameContainer = document.getElementsByClassName('valign-wrapper vspace-between')[1];
+    });
+
+    if (!stockLTPContainer) {
+        stockLTPContainer = document.getElementsByClassName('valign-wrapper')[44];
     }
 }
 
 let addPerformanceOnLtpChange = () => {
     let className = 'extension performance';
     if (highElement) {
-        let highValue = parseFloat(highElement.textContent);
-        let ltpValue = parseFloat(ltpElement.textContent);
+        let highValue = parseFloat(highElement.textContent.replace(/,/g, ''));
+        let ltpValue = parseFloat(ltpElement.textContent.replace(/,/g, ''));
         let ltpHighPercentageDiff = (((highValue - ltpValue) / ltpValue) * 100).toFixed(2);
         let amount = document.getElementById('inputAmount').value;
         let qtyValue = parseInt(amount / ltpValue);
 
+        if (!performanceLtpHighValue) {
+            let ltpHighElement = document.querySelector('div.col.l3.extension.performance.ltp-high');
+            if (ltpHighElement) {
+                performanceLtpHighValue = ltpHighElement.querySelector('.stockPerformance_value__g7yez.bodyLargeHeavy');
+            }
+        }
+
+        if (!performanceQtyValue) {
+            let qtyElement = document.querySelector('div.col.l3.extension.performance.qty');
+            if (qtyElement) {
+                performanceQtyValue = qtyElement.querySelector('.stockPerformance_value__g7yez.bodyLargeHeavy');
+            }
+        }
+
         if (rowElement) {
-            if (performanceLtpHigh) {
-                if (performanceLtpHighValue) {
-                    performanceLtpHighValue.textContent = ltpHighPercentageDiff;
-                }
+            if (performanceLtpHighValue) {
+                performanceLtpHighValue.textContent = ltpHighPercentageDiff;
             } else {
                 addPerformanceElement(rowElement, className + ' ltp-high', 'LTP-HIGH diff(%)', ltpHighPercentageDiff);
             }
-            if (performanceQty) {
-                if (performanceQtyValue) {
-                    performanceQtyValue.textContent = qtyValue;
-                }
+            if (performanceQtyValue) {
+                performanceQtyValue.textContent = qtyValue;
             } else {
                 addPerformanceElement(rowElement, className + ' qty', 'Quantity', qtyValue);
             }
@@ -120,8 +135,8 @@ let addPerformanceOnLtpChange = () => {
 
 let addPerformance = () => {
     let className = 'extension performance';
-    let closeValue = parseFloat(closeElement.textContent);
-    let upperValue = parseFloat(upperElement.textContent);
+    let closeValue = parseFloat(namedElements['Prev. Close'].textContent.replace(/,/g, ''));
+    let upperValue = parseFloat(namedElements['Upper Circuit'].textContent.replace(/,/g, ''));
     let maxDiffPercentage = (((upperValue - closeValue) / closeValue) * 100).toFixed(2);
 
     if (rowElement) {
@@ -133,7 +148,6 @@ let addPerformance = () => {
 const handleChange = (mutationsList, observer) => {
     for (let mutation of mutationsList) {
         if (mutation.type === 'characterData' || mutation.type === 'childList') {
-            initializeElements();
             addPerformanceOnLtpChange();
         }
     }
@@ -205,9 +219,9 @@ const addContractDetails = async () => {
             alert(`HTTP error! status: ${response.status}`);
         }
         const jsonResponse = await response.json();
-        let isT2T = jsonResponse["isT2t"] ? "T2T" : "Normal";
+        let content = jsonResponse["isT2t"] ? "T2T" : "Normal";
         let color = jsonResponse["isT2t"] ? 'rgb(198, 92, 66)' : 'rgb(85, 184, 148)';
-        addElement('div', isT2T, "", color, stockNameContainer);
+        addElement('div', content, "lpu38Day bodyBaseHeavy contentPositive", color, stockLTPContainer);
 
         return jsonResponse;
     } catch (error) {
