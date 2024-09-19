@@ -8,5 +8,10 @@
       "js": ["stocks.js"],
       "matches": ["https://groww.in/stocks/*"]
     }
-  ]
+  ],
+  "icons": {
+    "16": "app_logo.png",
+    "48": "app_logo.png", 
+    "128": "app_logo.png" 
+  }
 }
