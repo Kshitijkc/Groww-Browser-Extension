@@ -185,7 +185,7 @@ const scrollIntoView = () => {
 
 const addInputFields = () => {
     var newInput = document.createElement("input");
-    newInput.className = "buySellOrder_qtyinputbox__jMqei headingLarge";
+    newInput.className = "buySellOrder_qtyinputbox__jMqei  bodyLargeHeavy contentPrimary borderPrimary";
     newInput.id = "inputAmount";
     newInput.type = "number";
     newInput.min = "1";
@@ -198,7 +198,7 @@ const addInputFields = () => {
         addPerformanceOnLtpChange();
     });
 
-    let livePriceCard = document.getElementById('card-live-price');
+    let livePriceCard = document.querySelector('.width100.buySellOrder_bso21Head__4p9v2.valign-wrapper.vspace-between');
     livePriceCard.appendChild(newInput);
 }
 
