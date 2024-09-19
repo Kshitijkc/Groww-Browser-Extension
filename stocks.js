@@ -185,7 +185,7 @@ const scrollIntoView = () => {
 
 const addInputFields = () => {
     var newInput = document.createElement("input");
-    newInput.className = "buySellOrder_qtyinputbox__jMqei  bodyLargeHeavy contentPrimary borderPrimary";
+    newInput.className = "buySellOrder_qtyinputbox__jMqei amount_input_box  bodyLargeHeavy contentPrimary borderPrimary";
     newInput.id = "inputAmount";
     newInput.type = "number";
     newInput.min = "1";
