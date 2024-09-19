@@ -16,12 +16,14 @@ let performanceLtpHighValue = null;
 let performanceQtyValue = null;
 let namedElements = {};
 let stockLTPContainer = null;
+let htmlElement = null;
 
 let makeElementSticky = (element, top, zIndex) => {
+    let theme = htmlElement.getAttribute('data-theme');
     element.style.position = 'sticky';
     element.style.top = top;
     element.style.zIndex = zIndex;
-    element.style.backgroundColor = "rgba(18, 18, 18, 0.85)";
+    element.style.backgroundColor = theme ==="dark" ? "rgba(18, 18, 18, 0.85)" : "rgba(255, 255, 255, 0.85)";
 }
 
 let addPerformanceElement = (rootElement, className, name, value) => {
@@ -47,6 +49,9 @@ function getRandomNumber(min, max) {
 }
 
 let initializeElements = () => {
+    if (!htmlElement) {
+        htmlElement = document.documentElement;
+    }
     if (!mainDiv) {
         mainDiv = document.querySelector('div.lpu38MainDiv');
     }
@@ -141,11 +146,22 @@ let addPerformance = () => {
     }
 }
 
+let configureStickyElements = () => {
+    if (mainDiv) {
+        makeElementSticky(mainDiv, '30px', '5');
+    }
+    if (holdingDetails) {
+        makeElementSticky(holdingDetails, '40px', '4');
+    }
+}
+
 // Create a callback function to handle changes
 const handleChange = (mutationsList, observer) => {
     for (let mutation of mutationsList) {
         if (mutation.type === 'characterData' || mutation.type === 'childList') {
             addPerformanceOnLtpChange();
+        } else if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
+            configureStickyElements();
         }
     }
 };
@@ -217,7 +233,7 @@ const addContractDetails = async () => {
         }
         const jsonResponse = await response.json();
         let content = jsonResponse["isT2t"] ? "T2T" : "Normal";
-        let color = jsonResponse["isT2t"] ? 'rgb(198, 92, 66)' : 'rgb(85, 184, 148)';
+        let color = jsonResponse["isT2t"] ? 'var(--red500)' : 'var(--green500)';
         addElement('div', content, "lpu38Day bodyBaseHeavy contentPositive", color, stockLTPContainer);
 
         return jsonResponse;
@@ -228,12 +244,7 @@ const addContractDetails = async () => {
 
 let main = () => {
     initializeElements();
-    if (mainDiv) {
-        makeElementSticky(mainDiv, '30px', '5');
-    }
-    if (holdingDetails) {
-        makeElementSticky(holdingDetails, '40px', '4');
-    }
+    configureStickyElements();
     addInputFields();
     addPerformanceOnLtpChange();
     addPerformance();
@@ -241,8 +252,15 @@ let main = () => {
     addContractDetails();
 
     const observer = new MutationObserver(handleChange);
-    const config = { childList: true, subtree: true, characterData: true };
+    const config = { 
+        childList: true, 
+        subtree: true, 
+        characterData: true,
+        attributes: true,
+        attributeFilter: ['data-theme']
+    };
     observer.observe(ltpElement, config);
+    observer.observe(htmlElement, config);
     setTimeout(() => {
         location.reload(true);
     }, getRandomNumber(10, 30)*1000);
