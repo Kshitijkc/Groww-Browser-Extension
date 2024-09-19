@@ -9,6 +9,7 @@ let performanceLtpHigh = null;
 let performanceLtpHighValue = null;
 let performanceQty = null;
 let performanceQtyValue = null;
+let stockNameContainer = null;
 
 let makeElementSticky = (element, top, zIndex) => {
     element.style.position = 'sticky';
@@ -25,6 +26,18 @@ let addPerformanceElement = (rootElement, className, name, value) => {
         <span class="stockPerformance_value__g7yez bodyLargeHeavy">${value}</span>
     `;
     rootElement.appendChild(newDiv);
+}
+
+let addElement = (elementType, content, className, color, container) => {
+    let newElement = document.createElement(elementType);
+    newElement.className = className;
+    newElement.innerHTML = content;
+    newElement.style.color = color;
+    container.appendChild(newElement);
+}
+
+function getRandomNumber(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 let initializeElements = () => {
@@ -70,6 +83,9 @@ let initializeElements = () => {
     if (performanceQty && !performanceQtyValue) {
         performanceQtyValue = performanceQty.querySelector('.stockPerformance_value__g7yez');
     }
+    if (!stockNameContainer) {
+        stockNameContainer = document.getElementsByClassName('valign-wrapper vspace-between')[1];
+    }
 }
 
 let addPerformanceOnLtpChange = () => {
@@ -79,7 +95,7 @@ let addPerformanceOnLtpChange = () => {
         let ltpValue = parseFloat(ltpElement.textContent);
         let ltpHighPercentageDiff = (((highValue - ltpValue) / ltpValue) * 100).toFixed(2);
         let amount = document.getElementById('inputAmount').value;
-        let qtyValue = parseInt(amount/ltpValue);
+        let qtyValue = parseInt(amount / ltpValue);
 
         if (rowElement) {
             if (performanceLtpHigh) {
@@ -159,6 +175,46 @@ const addInputFields = () => {
     livePriceCard.appendChild(newInput);
 }
 
+const addContractDetails = async () => {
+    const scriptTag = document.getElementById('__NEXT_DATA__');
+    const data = JSON.parse(scriptTag.textContent);
+    const isNseTradable = data.props.pageProps.stockData.header.isNseTradable;
+    const isBseTradable = data.props.pageProps.stockData.header.isBseTradable;
+    const isin = data.props.pageProps.stockData.header.isin;
+    let market = null;
+
+    if (isNseTradable) {
+        market = "NSE";
+    } else if (isBseTradable) {
+        market = "BSE";
+    }
+    if (market === null) {
+        console.log("The stock is not tradable on NSE or BSE.");
+        return;
+    }
+
+    const url = `https://groww.in/v1/api/stocks/oms/rms/exchange/${market}/contract/${isin}/info`;
+    try {
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        if (!response.ok) {
+            alert(`HTTP error! status: ${response.status}`);
+        }
+        const jsonResponse = await response.json();
+        let isT2T = jsonResponse["isT2t"] ? "T2T" : "Normal";
+        let color = jsonResponse["isT2t"] ? 'rgb(198, 92, 66)' : 'rgb(85, 184, 148)';
+        addElement('div', isT2T, "", color, stockNameContainer);
+
+        return jsonResponse;
+    } catch (error) {
+        console.error('Error fetching stock details:', error);
+    }
+}
+
 let main = () => {
     initializeElements();
     if (mainDiv) {
@@ -171,13 +227,14 @@ let main = () => {
     addPerformanceOnLtpChange();
     addPerformance();
     scrollIntoView();
-    
+    addContractDetails();
+
     const observer = new MutationObserver(handleChange);
     const config = { childList: true, subtree: true, characterData: true };
     observer.observe(ltpElement, config);
-    // setTimeout(() => {
-    //     location.reload(true);
-    // }, 15000);
+    setTimeout(() => {
+        location.reload(true);
+    }, getRandomNumber(10, 30)*1000);
 }
 
 setTimeout(main, 3000);
