@@ -5,10 +5,7 @@ let pattern = /^https:\/\/groww\.in\/stocks\/[^\/]+$/;
 let currentUrl = window.location.href;
 
 // Check if the current URL matches the pattern
-if (!pattern.test(currentUrl)) {
-    // If the URL does not match, exit further execution
-    throw new Error("URL does not match the pattern");
-}
+if (pattern.test(currentUrl)) {
 
 let mainDiv = null;
 let holdingDetails = null;
@@ -252,3 +249,5 @@ let main = () => {
 }
 
 setTimeout(main, 3000);
+
+}
