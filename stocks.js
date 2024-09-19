@@ -86,7 +86,7 @@ let initializeElements = () => {
     });
 
     if (!stockLTPContainer) {
-        stockLTPContainer = document.getElementsByClassName('valign-wrapper')[44];
+        stockLTPContainer = document.querySelector('.lpu38Pri.valign-wrapper.false.displayBase').parentElement;
     }
 }
 
