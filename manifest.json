@@ -3,6 +3,9 @@
   "name": "Groww",
   "version": "1.0.0",
   "description": "Add features to Groww stocks page",
+  "permissions": [
+    "storage"
+  ],
   "content_scripts": [
     {
       "js": ["stocks.js"],

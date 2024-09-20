@@ -17,6 +17,7 @@ let performanceQtyValue = null;
 let namedElements = {};
 let stockLTPContainer = null;
 let htmlElement = null;
+let className = 'extension performance';
 
 let makeElementSticky = (element, top, zIndex) => {
     let theme = htmlElement.getAttribute('data-theme');
@@ -95,26 +96,40 @@ let initializeElements = () => {
     }
 }
 
-let addPerformanceOnLtpChange = () => {
-    let className = 'extension performance';
+let addOrUpdatePerformanceOnAmountChange = async () => {
+    let amount = document.getElementById('inputAmount').value;
+    let ltpValue = parseFloat(ltpElement.textContent.replace(/,/g, ''));
+    let qtyValue = parseInt(amount / ltpValue);
+
+    if (!performanceQtyValue) {
+        let qtyElement = document.querySelector('div.col.l3.extension.performance.qty');
+        if (qtyElement) {
+            performanceQtyValue = qtyElement.querySelector('.stockPerformance_value__g7yez.bodyLargeHeavy');
+        }
+    }
+    
+    if (rowElement) {
+        if (performanceQtyValue) {
+            await chrome.storage.local.set({ amount });
+            performanceQtyValue.textContent = qtyValue;
+        } else {
+            addPerformanceElement(rowElement, className + ' qty', 'Quantity', qtyValue);
+        }
+    } else {
+        console.log('No div with class "row" found next to the divider.');
+    }
+}
+
+let addOrUpdatePerformanceOnLtpChange = async () => {
     if (highElement) {
         let highValue = parseFloat(highElement.textContent.replace(/,/g, ''));
         let ltpValue = parseFloat(ltpElement.textContent.replace(/,/g, ''));
         let ltpHighPercentageDiff = (((highValue - ltpValue) / ltpValue) * 100).toFixed(2);
-        let amount = document.getElementById('inputAmount').value;
-        let qtyValue = parseInt(amount / ltpValue);
 
         if (!performanceLtpHighValue) {
             let ltpHighElement = document.querySelector('div.col.l3.extension.performance.ltp-high');
             if (ltpHighElement) {
                 performanceLtpHighValue = ltpHighElement.querySelector('.stockPerformance_value__g7yez.bodyLargeHeavy');
-            }
-        }
-
-        if (!performanceQtyValue) {
-            let qtyElement = document.querySelector('div.col.l3.extension.performance.qty');
-            if (qtyElement) {
-                performanceQtyValue = qtyElement.querySelector('.stockPerformance_value__g7yez.bodyLargeHeavy');
             }
         }
 
@@ -124,15 +139,11 @@ let addPerformanceOnLtpChange = () => {
             } else {
                 addPerformanceElement(rowElement, className + ' ltp-high', 'LTP-HIGH diff(%)', ltpHighPercentageDiff);
             }
-            if (performanceQtyValue) {
-                performanceQtyValue.textContent = qtyValue;
-            } else {
-                addPerformanceElement(rowElement, className + ' qty', 'Quantity', qtyValue);
-            }
         } else {
             console.log('No div with class "row" found next to the divider.');
         }
     }
+    await addOrUpdatePerformanceOnAmountChange();
 }
 
 let addPerformance = () => {
@@ -156,10 +167,10 @@ let configureStickyElements = () => {
 }
 
 // Create a callback function to handle changes
-const handleChange = (mutationsList, observer) => {
+const handleChange = async (mutationsList, observer) => {
     for (let mutation of mutationsList) {
         if (mutation.type === 'characterData' || mutation.type === 'childList') {
-            addPerformanceOnLtpChange();
+            await addOrUpdatePerformanceOnLtpChange();
         } else if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
             configureStickyElements();
         }
@@ -183,19 +194,23 @@ const scrollIntoView = () => {
     }
 }
 
-const addInputFields = () => {
+const addInputFields = async () => {
+    let default_amount = 20000;
+    let result = await chrome.storage.local.get(['amount']);
+    if (result.amount) {
+        default_amount = result.amount;
+    }
     var newInput = document.createElement("input");
     newInput.className = "buySellOrder_qtyinputbox__jMqei amount_input_box  bodyLargeHeavy contentPrimary borderPrimary";
     newInput.id = "inputAmount";
     newInput.type = "number";
     newInput.min = "1";
-    newInput.value = "20000";
+    newInput.value = default_amount;
     newInput.placeholder = "Amount"
 
     // Add change event listener
-    newInput.addEventListener('input', (event) => {
-        initializeElements();
-        addPerformanceOnLtpChange();
+    newInput.addEventListener('input', async (event) => {
+        await addOrUpdatePerformanceOnAmountChange();
     });
 
     let livePriceCard = document.querySelector('.width100.buySellOrder_bso21Head__4p9v2.valign-wrapper.vspace-between');
@@ -242,11 +257,11 @@ const addContractDetails = async () => {
     }
 }
 
-let main = () => {
+let main = async () => {
     initializeElements();
     configureStickyElements();
-    addInputFields();
-    addPerformanceOnLtpChange();
+    await addInputFields();
+    await addOrUpdatePerformanceOnLtpChange();
     addPerformance();
     scrollIntoView();
     addContractDetails();
