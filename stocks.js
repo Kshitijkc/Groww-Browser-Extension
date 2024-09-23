@@ -281,6 +281,6 @@ let main = async () => {
     }, getRandomNumber(10, 30)*1000);
 }
 
-window.onload = main;
+window.onload = setTimeout(main, 3000);
 
 }
