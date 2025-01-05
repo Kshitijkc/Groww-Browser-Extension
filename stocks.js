@@ -159,7 +159,7 @@ let addPerformance = () => {
 
 let configureStickyElements = () => {
     if (mainDiv) {
-        makeElementSticky(mainDiv, '30px', '5');
+        makeElementSticky(mainDiv, '-120px', '5');
     }
     if (holdingDetails) {
         makeElementSticky(holdingDetails, '40px', '4');
@@ -276,9 +276,9 @@ let main = async () => {
     };
     observer.observe(ltpElement, config);
     observer.observe(htmlElement, config);
-    setTimeout(() => {
-        location.reload(true);
-    }, getRandomNumber(10, 30)*1000);
+    // setTimeout(() => {
+    //     location.reload(true);
+    // }, getRandomNumber(10, 30)*1000);
 }
 
 window.onload = setTimeout(main, 3000);
