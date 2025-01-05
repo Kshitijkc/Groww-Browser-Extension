@@ -37,11 +37,14 @@ let addPerformanceElement = (rootElement, className, name, value) => {
     rootElement.appendChild(newDiv);
 }
 
-let addElement = (elementType, content, className, color, container) => {
+let addElement = (elementType, content, className, color, container, attributes={}) => {
     let newElement = document.createElement(elementType);
     newElement.className = className;
     newElement.innerHTML = content;
     newElement.style.color = color;
+    for (const key in attributes) {
+        newElement.setAttribute(key, attributes[key]);
+    }
     container.appendChild(newElement);
 }
 
@@ -223,6 +226,7 @@ const addContractDetails = async () => {
     const isNseTradable = data.props.pageProps.stockData.header.isNseTradable;
     const isBseTradable = data.props.pageProps.stockData.header.isBseTradable;
     const isin = data.props.pageProps.stockData.header.isin;
+    const websiteUrl = data.props.pageProps.stockData.details.websiteUrl;
     let market = null;
 
     if (isNseTradable) {
@@ -250,6 +254,7 @@ const addContractDetails = async () => {
         let content = jsonResponse["isT2t"] ? "T2T" : "Normal";
         let color = jsonResponse["isT2t"] ? 'var(--red500)' : 'var(--green500)';
         addElement('div', content, "lpu38Day bodyBaseHeavy contentPositive", color, stockLTPContainer);
+        addElement('a', "Link", "lpu38Day bodyBaseHeavy contentPositive", "yellow", stockLTPContainer, { href: websiteUrl, target: "_blank" });
 
         return jsonResponse;
     } catch (error) {
