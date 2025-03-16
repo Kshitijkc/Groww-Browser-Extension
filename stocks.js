@@ -254,7 +254,9 @@ const addContractDetails = async () => {
         let content = jsonResponse["isT2t"] ? "T2T" : "Normal";
         let color = jsonResponse["isT2t"] ? 'var(--red500)' : 'var(--green500)';
         addElement('div', content, "lpu38Day bodyBaseHeavy contentPositive", color, stockLTPContainer);
-        addElement('a', "Link", "lpu38Day bodyBaseHeavy contentPositive", "yellow", stockLTPContainer, { href: websiteUrl, target: "_blank" });
+        if (websiteUrl) {
+            addElement('a', "Website", "lpu38Day bodyBaseHeavy contentPositive", "rgb(80, 156, 248)", stockLTPContainer, { href: websiteUrl, target: "_blank" });
+        }
 
         return jsonResponse;
     } catch (error) {
