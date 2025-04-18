@@ -60,10 +60,10 @@ let initializeElements = () => {
         mainDiv = document.querySelector('div.lpu38MainDiv');
     }
     if (!holdingDetails) {
-        holdingDetails = document.getElementsByClassName('yh878ContentDiv backgroundPrimary borderPrimary')[0];
+        holdingDetails = document.getElementsByClassName('cur-po contentPrimary borderPrimary width100 flex flex-column stockProduct_stkP12ProductPageMidSectionWrapper__vhPRw')[0];
     }
     if (!ltpElement) {
-        ltpElement = document.getElementsByClassName('lpu38San')[0].nextElementSibling;
+        ltpElement = document.querySelector('span.lpu38San').nextElementSibling;
     }
     if (!highElement) {
         const highElementParent = document.getElementsByClassName('pbar29Value bodyLarge')[1];
@@ -165,20 +165,9 @@ let configureStickyElements = () => {
         makeElementSticky(mainDiv, '-120px', '5');
     }
     if (holdingDetails) {
-        makeElementSticky(holdingDetails, '40px', '4');
+        makeElementSticky(holdingDetails, '10px', '4');
     }
 }
-
-// Create a callback function to handle changes
-const handleChange = async (mutationsList, observer) => {
-    for (let mutation of mutationsList) {
-        if (mutation.type === 'characterData' || mutation.type === 'childList') {
-            await addOrUpdatePerformanceOnLtpChange();
-        } else if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
-            configureStickyElements();
-        }
-    }
-};
 
 // scroll into view
 const scrollIntoView = () => {
@@ -273,16 +262,22 @@ let main = async () => {
     scrollIntoView();
     addContractDetails();
 
-    const observer = new MutationObserver(handleChange);
-    const config = { 
-        childList: true, 
-        subtree: true, 
-        characterData: true,
+    const observer1 = new MutationObserver(async () => {
+        await addOrUpdatePerformanceOnLtpChange();
+    });
+    const config1 = { 
+        characterData: true
+    };
+    observer1.observe(ltpElement, config1);
+
+    const observer2 = new MutationObserver(async () => {
+        configureStickyElements();
+    });
+    const config2 = { 
         attributes: true,
         attributeFilter: ['data-theme']
     };
-    observer.observe(ltpElement, config);
-    observer.observe(htmlElement, config);
+    observer2.observe(htmlElement, config2);
     // setTimeout(() => {
     //     location.reload(true);
     // }, getRandomNumber(10, 30)*1000);
