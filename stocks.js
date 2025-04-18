@@ -13,11 +13,13 @@ let ltpElement = null;
 let highElement = null;
 let rowElement = null;
 let performanceLtpHighValue = null;
-let performanceQtyValue = null;
 let namedElements = {};
 let stockLTPContainer = null;
 let htmlElement = null;
 let className = 'extension performance';
+let amountElement = null;
+let quantityElement = null;
+let contentSecondaryContainer = null;
 
 let makeElementSticky = (element, top, zIndex) => {
     let theme = htmlElement.getAttribute('data-theme');
@@ -97,29 +99,33 @@ let initializeElements = () => {
     if (!stockLTPContainer) {
         stockLTPContainer = document.querySelector('.lpu38Pri.valign-wrapper.false.displayBase').parentElement;
     }
+    if (!contentSecondaryContainer) {
+        contentSecondaryContainer = document.querySelector("div.valign-wrapper.contentSecondary.bodySmall");
+    }
 }
 
-let addOrUpdatePerformanceOnAmountChange = async () => {
-    let amount = document.getElementById('inputAmount').value;
+let addOrUpdatePerformanceOnAmountChange = async (amount) => {
+    if (amount) {
+        await chrome.storage.local.set({ amount });
+    } else {
+        amount = amountElement.value;
+    }
     let ltpValue = parseFloat(ltpElement.textContent.replace(/,/g, ''));
     let qtyValue = parseInt(amount / ltpValue);
-
-    if (!performanceQtyValue) {
-        let qtyElement = document.querySelector('div.col.l3.extension.performance.qty');
-        if (qtyElement) {
-            performanceQtyValue = qtyElement.querySelector('.stockPerformance_value__g7yez.bodyLargeHeavy');
-        }
-    }
-    
-    if (rowElement) {
-        if (performanceQtyValue) {
-            await chrome.storage.local.set({ amount });
-            performanceQtyValue.textContent = qtyValue;
-        } else {
-            addPerformanceElement(rowElement, className + ' qty', 'Quantity', qtyValue);
-        }
+    if (!quantityElement) {
+        quantityElement = document.createElement('div');
+        quantityElement.className = `bodySmall flex`;
+        quantityElement.style.marginLeft = '4px';
+        quantityElement.innerHTML = `
+            <span class="contentSecondary">QTY:</span>
+            <span style="margin-left: 3px;">${qtyValue}</span>
+        `;
+        contentSecondaryContainer.appendChild(quantityElement);
     } else {
-        console.log('No div with class "row" found next to the divider.');
+        quantityElement.innerHTML = `
+            <span class="contentSecondary">QTY:</span>
+            <span style="margin-left: 3px;">${qtyValue}</span>
+        `;
     }
 }
 
@@ -192,21 +198,21 @@ const addInputFields = async () => {
     if (result.amount) {
         default_amount = result.amount;
     }
-    var newInput = document.createElement("input");
-    newInput.className = "buySellOrder_qtyinputbox__jMqei amount_input_box  bodyLargeHeavy contentPrimary borderPrimary";
-    newInput.id = "inputAmount";
-    newInput.type = "number";
-    newInput.min = "1";
-    newInput.value = default_amount;
-    newInput.placeholder = "Amount"
+    amountElement = document.createElement("input");
+    amountElement.className = "buySellOrder_qtyinputbox__jMqei amount_input_box  bodyLargeHeavy contentPrimary borderPrimary";
+    amountElement.id = "inputAmount";
+    amountElement.type = "number";
+    amountElement.min = "1";
+    amountElement.value = default_amount;
+    amountElement.placeholder = "Amount"
 
     // Add change event listener
-    newInput.addEventListener('input', async (event) => {
-        await addOrUpdatePerformanceOnAmountChange();
+    amountElement.addEventListener('input', async (event) => {
+        await addOrUpdatePerformanceOnAmountChange(event.target.value);
     });
 
     let livePriceCard = document.querySelector('.width100.buySellOrder_bso21Head__4p9v2.valign-wrapper.vspace-between');
-    livePriceCard.appendChild(newInput);
+    livePriceCard.appendChild(amountElement);
 }
 
 const addContractDetails = async () => {
