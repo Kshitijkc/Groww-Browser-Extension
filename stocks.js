@@ -5,6 +5,9 @@ const initializeElements = () => {
     if (!mainDiv) {
         mainDiv = document.querySelector('div.lpu38MainDiv');
     }
+    if (!holdingsElement) {
+        holdingsElement = document.querySelector('div.flex.width100.contentPrimary.yourHoldingsWithSIP_yh878HoldingDetails__Lq_oH');
+    }
     if (!holdingDetailsContainer) {
         holdingDetailsContainer = document.getElementsByClassName('cur-po contentPrimary borderPrimary width100 flex flex-column stockProduct_stkP12ProductPageMidSectionWrapper__vhPRw')[0];
     }
@@ -49,7 +52,7 @@ const configureStickyElements = () => {
     if (mainDiv) {
         makeElementSticky(mainDiv, '-120px', '5');
     }
-    if (holdingDetailsContainer) {
+    if (holdingDetailsContainer && holdingsElement) {
         makeElementSticky(holdingDetailsContainer, '3px', '4');
     }
 }
@@ -241,6 +244,7 @@ const currentUrl = window.location.href;
 // Check if the current URL matches the pattern
 if (pattern.test(currentUrl)) {
     var mainDiv = null;
+    var holdingsElement = null;
     var holdingDetailsContainer = null;
     var ltpElement = null;
     var highElement = null;
