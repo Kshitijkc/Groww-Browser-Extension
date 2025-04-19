@@ -8,7 +8,7 @@ let currentUrl = window.location.href;
 if (pattern.test(currentUrl)) {
 
 let mainDiv = null;
-let holdingDetails = null;
+let holdingDetailsContainer = null;
 let ltpElement = null;
 let highElement = null;
 let rowElement = null;
@@ -26,7 +26,7 @@ let makeElementSticky = (element, top, zIndex) => {
     element.style.position = 'sticky';
     element.style.top = top;
     element.style.zIndex = zIndex;
-    element.style.backgroundColor = theme ==="dark" ? "rgba(18, 18, 18, 0.85)" : "rgba(255, 255, 255, 0.85)";
+    element.style.backgroundColor = theme ==="dark" ? "rgba(18, 18, 18, 0.7)" : "rgba(255, 255, 255, 0.7)";
 }
 
 let addPerformanceElement = (rootElement, className, name, value) => {
@@ -61,8 +61,8 @@ let initializeElements = () => {
     if (!mainDiv) {
         mainDiv = document.querySelector('div.lpu38MainDiv');
     }
-    if (!holdingDetails) {
-        holdingDetails = document.getElementsByClassName('cur-po contentPrimary borderPrimary width100 flex flex-column stockProduct_stkP12ProductPageMidSectionWrapper__vhPRw')[0];
+    if (!holdingDetailsContainer) {
+        holdingDetailsContainer = document.getElementsByClassName('cur-po contentPrimary borderPrimary width100 flex flex-column stockProduct_stkP12ProductPageMidSectionWrapper__vhPRw')[0];
     }
     if (!ltpElement) {
         ltpElement = document.querySelector('span.lpu38San').nextElementSibling;
@@ -170,8 +170,8 @@ let configureStickyElements = () => {
     if (mainDiv) {
         makeElementSticky(mainDiv, '-120px', '5');
     }
-    if (holdingDetails) {
-        makeElementSticky(holdingDetails, '10px', '4');
+    if (holdingDetailsContainer) {
+        makeElementSticky(holdingDetailsContainer, '3px', '4');
     }
 }
 
