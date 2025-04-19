@@ -27,10 +27,6 @@ const addElement = (elementType, content, className, color, container, attribute
     container.appendChild(newElement);
 }
 
-const getRandomNumber = (min, max) => {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
 const initializeElements = () => {
     if (!htmlElement) {
         htmlElement = document.documentElement;
@@ -236,9 +232,6 @@ const main = async () => {
         attributeFilter: ['data-theme']
     };
     observer2.observe(htmlElement, config2);
-    // setTimeout(() => {
-    //     location.reload(true);
-    // }, getRandomNumber(10, 30)*1000);
 }
 
 // Define the regular expression pattern
