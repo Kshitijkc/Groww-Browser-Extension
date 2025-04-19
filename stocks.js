@@ -1,32 +1,3 @@
-const makeElementSticky = (element, top, zIndex) => {
-    const theme = htmlElement.getAttribute('data-theme');
-    element.style.position = 'sticky';
-    element.style.top = top;
-    element.style.zIndex = zIndex;
-    element.style.backgroundColor = theme === "dark" ? "rgba(18, 18, 18, 0.7)" : "rgba(255, 255, 255, 0.7)";
-}
-
-const addPerformanceElement = (rootElement, className, name, value) => {
-    const newDiv = document.createElement('div');
-    newDiv.className = `col l3 ${className.trim()}`;
-    newDiv.innerHTML = `
-        <div class="stockPerformance_keyText__f0fuN stockPerformance_keyTextStk__shi_y left-align bodyBase">${name}</div>
-        <span class="stockPerformance_value__g7yez bodyLargeHeavy">${value}</span>
-    `;
-    rootElement.appendChild(newDiv);
-}
-
-const addElement = (elementType, content, className, color, container, attributes = {}) => {
-    const newElement = document.createElement(elementType);
-    newElement.className = className;
-    newElement.innerHTML = content;
-    newElement.style.color = color;
-    for (const key in attributes) {
-        newElement.setAttribute(key, attributes[key]);
-    }
-    container.appendChild(newElement);
-}
-
 const initializeElements = () => {
     if (!htmlElement) {
         htmlElement = document.documentElement;
@@ -66,6 +37,33 @@ const initializeElements = () => {
     }
 }
 
+const makeElementSticky = (element, top, zIndex) => {
+    const theme = htmlElement.getAttribute('data-theme');
+    element.style.position = 'sticky';
+    element.style.top = top;
+    element.style.zIndex = zIndex;
+    element.style.backgroundColor = theme === "dark" ? "rgba(18, 18, 18, 0.7)" : "rgba(255, 255, 255, 0.7)";
+}
+
+const configureStickyElements = () => {
+    if (mainDiv) {
+        makeElementSticky(mainDiv, '-120px', '5');
+    }
+    if (holdingDetailsContainer) {
+        makeElementSticky(holdingDetailsContainer, '3px', '4');
+    }
+}
+
+const addPerformanceElement = (rootElement, className, name, value) => {
+    const newDiv = document.createElement('div');
+    newDiv.className = `col l3 ${className.trim()}`;
+    newDiv.innerHTML = `
+        <div class="stockPerformance_keyText__f0fuN stockPerformance_keyTextStk__shi_y left-align bodyBase">${name}</div>
+        <span class="stockPerformance_value__g7yez bodyLargeHeavy">${value}</span>
+    `;
+    rootElement.appendChild(newDiv);
+}
+
 const addOrUpdatePerformanceOnAmountChange = async (amount) => {
     if (amount) {
         await chrome.storage.local.set({ amount });
@@ -89,6 +87,26 @@ const addOrUpdatePerformanceOnAmountChange = async (amount) => {
             <span style="margin-left: 3px;">${qtyValue}</span>
         `;
     }
+}
+
+const addInputFields = async () => {
+    let default_amount = 20000;
+    const result = await chrome.storage.local.get(['amount']);
+    if (result.amount) {
+        default_amount = result.amount;
+    }
+    amountElement = document.createElement("input");
+    amountElement.className = "buySellOrder_qtyinputbox__jMqei amount_input_box  bodyLargeHeavy contentPrimary borderPrimary";
+    amountElement.id = "inputAmount";
+    amountElement.type = "number";
+    amountElement.min = "1";
+    amountElement.value = default_amount;
+    amountElement.placeholder = "Amount"
+    amountElement.addEventListener('input', async (event) => {
+        await addOrUpdatePerformanceOnAmountChange(event.target.value);
+    });
+    const livePriceCard = document.querySelector('.width100.buySellOrder_bso21Head__4p9v2.valign-wrapper.vspace-between');
+    livePriceCard.appendChild(amountElement);
 }
 
 const addOrUpdatePerformanceOnLtpChange = async () => {
@@ -127,15 +145,6 @@ const addPerformance = () => {
     }
 }
 
-const configureStickyElements = () => {
-    if (mainDiv) {
-        makeElementSticky(mainDiv, '-120px', '5');
-    }
-    if (holdingDetailsContainer) {
-        makeElementSticky(holdingDetailsContainer, '3px', '4');
-    }
-}
-
 const scrollIntoView = () => {
     const headingElement = document.querySelector("div.stkP12TabsDiv.bodyXLargeHeavy");
     if (headingElement) {
@@ -148,24 +157,15 @@ const scrollIntoView = () => {
     }
 }
 
-const addInputFields = async () => {
-    let default_amount = 20000;
-    const result = await chrome.storage.local.get(['amount']);
-    if (result.amount) {
-        default_amount = result.amount;
+const addElement = (elementType, content, className, color, container, attributes = {}) => {
+    const newElement = document.createElement(elementType);
+    newElement.className = className;
+    newElement.innerHTML = content;
+    newElement.style.color = color;
+    for (const key in attributes) {
+        newElement.setAttribute(key, attributes[key]);
     }
-    amountElement = document.createElement("input");
-    amountElement.className = "buySellOrder_qtyinputbox__jMqei amount_input_box  bodyLargeHeavy contentPrimary borderPrimary";
-    amountElement.id = "inputAmount";
-    amountElement.type = "number";
-    amountElement.min = "1";
-    amountElement.value = default_amount;
-    amountElement.placeholder = "Amount"
-    amountElement.addEventListener('input', async (event) => {
-        await addOrUpdatePerformanceOnAmountChange(event.target.value);
-    });
-    const livePriceCard = document.querySelector('.width100.buySellOrder_bso21Head__4p9v2.valign-wrapper.vspace-between');
-    livePriceCard.appendChild(amountElement);
+    container.appendChild(newElement);
 }
 
 const addContractDetails = async () => {
