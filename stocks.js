@@ -1,36 +1,13 @@
-// Define the regular expression pattern
-let pattern = /^https:\/\/groww\.in\/stocks\/[^\/]+$/;
-
-// Get the current URL
-let currentUrl = window.location.href;
-
-// Check if the current URL matches the pattern
-if (pattern.test(currentUrl)) {
-
-let mainDiv = null;
-let holdingDetailsContainer = null;
-let ltpElement = null;
-let highElement = null;
-let rowElement = null;
-let performanceLtpHighValue = null;
-let namedElements = {};
-let stockLTPContainer = null;
-let htmlElement = null;
-let className = 'extension performance';
-let amountElement = null;
-let quantityElement = null;
-let contentSecondaryContainer = null;
-
-let makeElementSticky = (element, top, zIndex) => {
-    let theme = htmlElement.getAttribute('data-theme');
+const makeElementSticky = (element, top, zIndex) => {
+    const theme = htmlElement.getAttribute('data-theme');
     element.style.position = 'sticky';
     element.style.top = top;
     element.style.zIndex = zIndex;
-    element.style.backgroundColor = theme ==="dark" ? "rgba(18, 18, 18, 0.7)" : "rgba(255, 255, 255, 0.7)";
+    element.style.backgroundColor = theme === "dark" ? "rgba(18, 18, 18, 0.7)" : "rgba(255, 255, 255, 0.7)";
 }
 
-let addPerformanceElement = (rootElement, className, name, value) => {
-    var newDiv = document.createElement('div');
+const addPerformanceElement = (rootElement, className, name, value) => {
+    const newDiv = document.createElement('div');
     newDiv.className = `col l3 ${className.trim()}`;
     newDiv.innerHTML = `
         <div class="stockPerformance_keyText__f0fuN stockPerformance_keyTextStk__shi_y left-align bodyBase">${name}</div>
@@ -39,8 +16,8 @@ let addPerformanceElement = (rootElement, className, name, value) => {
     rootElement.appendChild(newDiv);
 }
 
-let addElement = (elementType, content, className, color, container, attributes={}) => {
-    let newElement = document.createElement(elementType);
+const addElement = (elementType, content, className, color, container, attributes = {}) => {
+    const newElement = document.createElement(elementType);
     newElement.className = className;
     newElement.innerHTML = content;
     newElement.style.color = color;
@@ -50,11 +27,11 @@ let addElement = (elementType, content, className, color, container, attributes=
     container.appendChild(newElement);
 }
 
-function getRandomNumber(min, max) {
+const getRandomNumber = (min, max) => {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-let initializeElements = () => {
+const initializeElements = () => {
     if (!htmlElement) {
         htmlElement = document.documentElement;
     }
@@ -73,29 +50,18 @@ let initializeElements = () => {
             highElement = highElementParent.querySelector('span');
         }
     }
-
-    // Find the parent element that contains the unique class 'stockPerformance_dividerHz__hL82_'
-    let parentElement = document.querySelector('.stockPerformance_dividerHz__hL82_').closest('.contentPrimary');
-    // Now get the specific row within this parent element
+    const parentElement = document.querySelector('.stockPerformance_dividerHz__hL82_').closest('.contentPrimary');
     rowElement = parentElement.querySelector('.row');
-    // Get all divs with class 'col l3' within the found row
-    let colDivs = rowElement.querySelectorAll('.col.l3');
-    // Iterate over the colDivs and extract the key-value pairs
+    const colDivs = rowElement.querySelectorAll('.col.l3');
     colDivs.forEach(div => {
-        // Get the key and value elements
-        let keyElement = div.querySelector('.stockPerformance_keyText__f0fuN');
-        let valueElement = div.querySelector('.stockPerformance_value__g7yez');
-    
-        // Store key-value pairs in the stockData object
+        const keyElement = div.querySelector('.stockPerformance_keyText__f0fuN');
+        const valueElement = div.querySelector('.stockPerformance_value__g7yez');
         if (keyElement && valueElement) {
-            let key = keyElement.textContent.trim();
-            let value = valueElement.textContent.trim();
-    
-            // Add the key-value pair to the stockData object
-            namedElements[key] = valueElement; // Store the reference to valueElement
+            const key = keyElement.textContent.trim();
+            const value = valueElement.textContent.trim();
+            namedElements[key] = valueElement;
         }
     });
-
     if (!stockLTPContainer) {
         stockLTPContainer = document.querySelector('.lpu38Pri.valign-wrapper.false.displayBase').parentElement;
     }
@@ -104,14 +70,14 @@ let initializeElements = () => {
     }
 }
 
-let addOrUpdatePerformanceOnAmountChange = async (amount) => {
+const addOrUpdatePerformanceOnAmountChange = async (amount) => {
     if (amount) {
         await chrome.storage.local.set({ amount });
     } else {
         amount = amountElement.value;
     }
-    let ltpValue = parseFloat(ltpElement.textContent.replace(/,/g, ''));
-    let qtyValue = parseInt(amount / ltpValue);
+    const ltpValue = parseFloat(ltpElement.textContent.replace(/,/g, ''));
+    const qtyValue = parseInt(amount / ltpValue);
     if (!quantityElement) {
         quantityElement = document.createElement('div');
         quantityElement.className = `bodySmall flex`;
@@ -129,14 +95,14 @@ let addOrUpdatePerformanceOnAmountChange = async (amount) => {
     }
 }
 
-let addOrUpdatePerformanceOnLtpChange = async () => {
+const addOrUpdatePerformanceOnLtpChange = async () => {
     if (highElement) {
-        let highValue = parseFloat(highElement.textContent.replace(/,/g, ''));
-        let ltpValue = parseFloat(ltpElement.textContent.replace(/,/g, ''));
-        let ltpHighPercentageDiff = (((highValue - ltpValue) / ltpValue) * 100).toFixed(2);
+        const highValue = parseFloat(highElement.textContent.replace(/,/g, ''));
+        const ltpValue = parseFloat(ltpElement.textContent.replace(/,/g, ''));
+        const ltpHighPercentageDiff = (((highValue - ltpValue) / ltpValue) * 100).toFixed(2);
 
         if (!performanceLtpHighValue) {
-            let ltpHighElement = document.querySelector('div.col.l3.extension.performance.ltp-high');
+            const ltpHighElement = document.querySelector('div.col.l3.extension.performance.ltp-high');
             if (ltpHighElement) {
                 performanceLtpHighValue = ltpHighElement.querySelector('.stockPerformance_value__g7yez.bodyLargeHeavy');
             }
@@ -155,18 +121,18 @@ let addOrUpdatePerformanceOnLtpChange = async () => {
     await addOrUpdatePerformanceOnAmountChange();
 }
 
-let addPerformance = () => {
-    let className = 'extension performance';
-    let closeValue = parseFloat(namedElements['Prev. Close'].textContent.replace(/,/g, ''));
-    let upperValue = parseFloat(namedElements['Upper Circuit'].textContent.replace(/,/g, ''));
-    let maxDiffPercentage = (((upperValue - closeValue) / closeValue) * 100).toFixed(2);
+const addPerformance = () => {
+    const className = 'extension performance';
+    const closeValue = parseFloat(namedElements['Prev. Close'].textContent.replace(/,/g, ''));
+    const upperValue = parseFloat(namedElements['Upper Circuit'].textContent.replace(/,/g, ''));
+    const maxDiffPercentage = (((upperValue - closeValue) / closeValue) * 100).toFixed(2);
 
     if (rowElement) {
         addPerformanceElement(rowElement, className + ' max-diff', 'Max Diff(%)', maxDiffPercentage);
     }
 }
 
-let configureStickyElements = () => {
+const configureStickyElements = () => {
     if (mainDiv) {
         makeElementSticky(mainDiv, '-120px', '5');
     }
@@ -175,17 +141,12 @@ let configureStickyElements = () => {
     }
 }
 
-// scroll into view
 const scrollIntoView = () => {
-    // Select the h2 element with the specified class
     const headingElement = document.querySelector("div.stkP12TabsDiv.bodyXLargeHeavy");
-
-    // Check if the element exists
     if (headingElement) {
-        // Scroll the element into view
         headingElement.scrollIntoView({
-            behavior: 'smooth', // Optional: for smooth scrolling
-            block: 'start' // Optional: align to the top of the view
+            behavior: 'smooth',
+            block: 'start'
         });
     } else {
         console.log("Element not found");
@@ -194,7 +155,7 @@ const scrollIntoView = () => {
 
 const addInputFields = async () => {
     let default_amount = 20000;
-    let result = await chrome.storage.local.get(['amount']);
+    const result = await chrome.storage.local.get(['amount']);
     if (result.amount) {
         default_amount = result.amount;
     }
@@ -205,13 +166,10 @@ const addInputFields = async () => {
     amountElement.min = "1";
     amountElement.value = default_amount;
     amountElement.placeholder = "Amount"
-
-    // Add change event listener
     amountElement.addEventListener('input', async (event) => {
         await addOrUpdatePerformanceOnAmountChange(event.target.value);
     });
-
-    let livePriceCard = document.querySelector('.width100.buySellOrder_bso21Head__4p9v2.valign-wrapper.vspace-between');
+    const livePriceCard = document.querySelector('.width100.buySellOrder_bso21Head__4p9v2.valign-wrapper.vspace-between');
     livePriceCard.appendChild(amountElement);
 }
 
@@ -223,7 +181,6 @@ const addContractDetails = async () => {
     const isin = data.props.pageProps.stockData.header.isin;
     const websiteUrl = data.props.pageProps.stockData.details.websiteUrl;
     let market = null;
-
     if (isNseTradable) {
         market = "NSE";
     } else if (isBseTradable) {
@@ -233,7 +190,6 @@ const addContractDetails = async () => {
         console.log("The stock is not tradable on NSE or BSE.");
         return;
     }
-
     const url = `https://groww.in/v1/api/stocks/oms/rms/exchange/${market}/contract/${isin}/info`;
     try {
         const response = await fetch(url, {
@@ -246,20 +202,19 @@ const addContractDetails = async () => {
             alert(`HTTP error! status: ${response.status}`);
         }
         const jsonResponse = await response.json();
-        let content = jsonResponse["isT2t"] ? "T2T" : "Normal";
-        let color = jsonResponse["isT2t"] ? 'var(--red500)' : 'var(--green500)';
+        const content = jsonResponse["isT2t"] ? "T2T" : "Normal";
+        const color = jsonResponse["isT2t"] ? 'var(--red500)' : 'var(--green500)';
         addElement('div', content, "lpu38Day bodyBaseHeavy contentPositive", color, stockLTPContainer);
         if (websiteUrl) {
             addElement('a', "Website", "lpu38Day bodyBaseHeavy contentPositive", "rgb(80, 156, 248)", stockLTPContainer, { href: websiteUrl, target: "_blank" });
         }
-
         return jsonResponse;
     } catch (error) {
         console.error('Error fetching stock details:', error);
     }
 }
 
-let main = async () => {
+const main = async () => {
     initializeElements();
     configureStickyElements();
     await addInputFields();
@@ -267,19 +222,17 @@ let main = async () => {
     addPerformance();
     scrollIntoView();
     addContractDetails();
-
     const observer1 = new MutationObserver(async () => {
         await addOrUpdatePerformanceOnLtpChange();
     });
-    const config1 = { 
+    const config1 = {
         characterData: true
     };
     observer1.observe(ltpElement, config1);
-
     const observer2 = new MutationObserver(async () => {
         configureStickyElements();
     });
-    const config2 = { 
+    const config2 = {
         attributes: true,
         attributeFilter: ['data-theme']
     };
@@ -289,6 +242,24 @@ let main = async () => {
     // }, getRandomNumber(10, 30)*1000);
 }
 
-window.onload = setTimeout(main, 3000);
-
+// Define the regular expression pattern
+const pattern = /^https:\/\/groww\.in\/stocks\/[^\/]+$/;
+// Get the current URL
+const currentUrl = window.location.href;
+// Check if the current URL matches the pattern
+if (pattern.test(currentUrl)) {
+    var mainDiv = null;
+    var holdingDetailsContainer = null;
+    var ltpElement = null;
+    var highElement = null;
+    var rowElement = null;
+    var performanceLtpHighValue = null;
+    var namedElements = {};
+    var stockLTPContainer = null;
+    var htmlElement = null;
+    var className = 'extension performance';
+    var amountElement = null;
+    var quantityElement = null;
+    var contentSecondaryContainer = null;
+    window.onload = setTimeout(main, 3000);
 }
