@@ -122,7 +122,6 @@ const addOrUpdatePerformanceOnLtpChange = async () => {
 }
 
 const addPerformance = () => {
-    const className = 'extension performance';
     const closeValue = parseFloat(namedElements['Prev. Close'].textContent.replace(/,/g, ''));
     const upperValue = parseFloat(namedElements['Upper Circuit'].textContent.replace(/,/g, ''));
     const maxDiffPercentage = (((upperValue - closeValue) / closeValue) * 100).toFixed(2);
