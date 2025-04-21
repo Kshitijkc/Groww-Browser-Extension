@@ -224,7 +224,8 @@ const main = async () => {
         await addOrUpdatePerformanceOnLtpChange();
     });
     const config1 = {
-        characterData: true
+        characterData: true,
+        subtree: true 
     };
     observer1.observe(ltpElement, config1);
     const observer2 = new MutationObserver(async () => {
