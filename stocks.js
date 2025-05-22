@@ -38,6 +38,10 @@ const initializeElements = () => {
     if (!contentSecondaryContainer) {
         contentSecondaryContainer = document.querySelector("div.valign-wrapper.contentSecondary.bodySmall");
     }
+    if (!stickyNavContainer) {
+        stickyNavContainer = document.getElementsByClassName('secondaryHeader_secondaryHeaderContainer__GUUMe secondaryHeader_pointerDisabled__gwEUo flex vspace-between flex-column')[0];
+        stickyNavContainer.style.display = 'none';
+    }
 }
 
 const makeElementSticky = (element, top, zIndex) => {
@@ -258,5 +262,6 @@ if (pattern.test(currentUrl)) {
     var amountElement = null;
     var quantityElement = null;
     var contentSecondaryContainer = null;
+    var stickyNavContainer = null;
     window.onload = setTimeout(main, 3000);
 }
