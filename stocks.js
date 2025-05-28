@@ -123,7 +123,7 @@ const addInputFields = async () => {
 const addOrUpdatePerformanceOnLtpChange = async () => {
     if (highElement) {
         const highValue = parseFloat(highElement.textContent.replace(/,/g, ''));
-        const ltpValue = parseFloat(ltpElement.textContent.replace(/,/g, ''));
+        const ltpValue = parseFloat(ltpElement.textContent.replace(/₹/g, ''));
         const ltpHighPercentageDiff = (((highValue - ltpValue) / ltpValue) * 100).toFixed(2);
 
         if (!performanceLtpHighValue) {
