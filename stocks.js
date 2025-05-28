@@ -12,7 +12,7 @@ const initializeElements = () => {
         holdingDetailsContainer = document.getElementsByClassName('cur-po contentPrimary borderPrimary width100 flex flex-column stockProduct_stkP12ProductPageMidSectionWrapper__vhPRw')[0];
     }
     if (!ltpElement) {
-        ltpElement = document.getElementsByClassName('lpu38Pri valign-wrapper false displayBase')[0];
+        ltpElement = document.getElementsByClassName('lpu38Pri valign-wrapper false displayBase')[0].firstChild;
     }
     if (!highElement) {
         const highElementParent = document.getElementsByClassName('pbar29Value bodyLarge')[1];
@@ -81,7 +81,7 @@ const addOrUpdatePerformanceOnAmountChange = async (amount) => {
     } else {
         amount = amountElement.value;
     }
-    const ltpValue = parseFloat(ltpElement.textContent.replace(/,/g, ''));
+    const ltpValue = parseFloat(ltpElement.textContent.replace(/₹/g, ''));
     const qtyValue = parseInt(amount / ltpValue);
     if (!quantityElement) {
         quantityElement = document.createElement('div');
