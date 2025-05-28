@@ -12,7 +12,7 @@ const initializeElements = () => {
         holdingDetailsContainer = document.getElementsByClassName('cur-po contentPrimary borderPrimary width100 flex flex-column stockProduct_stkP12ProductPageMidSectionWrapper__vhPRw')[0];
     }
     if (!ltpElement) {
-        ltpElement = document.querySelector('span.lpu38San').nextElementSibling;
+        ltpElement = document.getElementsByClassName('lpu38Pri valign-wrapper false displayBase')[0];
     }
     if (!highElement) {
         const highElementParent = document.getElementsByClassName('pbar29Value bodyLarge')[1];
@@ -38,8 +38,12 @@ const initializeElements = () => {
     if (!contentSecondaryContainer) {
         contentSecondaryContainer = document.querySelector("div.valign-wrapper.contentSecondary.bodySmall");
     }
-    if (!stickyNavContainer) {
-        stickyNavContainer = document.getElementsByClassName('secondaryHeader_secondaryHeaderContainer__GUUMe secondaryHeader_pointerDisabled__gwEUo flex vspace-between flex-column')[0];
+    let stickyNavContainer = document.getElementsByClassName('secondaryHeader_secondaryHeaderContainer__GUUMe secondaryHeader_pointerDisabled__gwEUo flex vspace-between flex-column')[0];
+    if (stickyNavContainer) {
+        stickyNavContainer.style.display = 'none';
+    }
+    stickyNavContainer = document.getElementsByClassName('secondaryHeader_secondaryHeaderContainer__GUUMe secondaryHeader_visible__lhvuo flex vspace-between flex-column')[0];
+    if (stickyNavContainer) {
         stickyNavContainer.style.display = 'none';
     }
 }
