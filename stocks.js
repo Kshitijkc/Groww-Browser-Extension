@@ -58,7 +58,7 @@ const makeElementSticky = (element, top, zIndex) => {
 
 const configureStickyElements = () => {
     if (mainDiv) {
-        makeElementSticky(mainDiv, '-120px', '5');
+        makeElementSticky(mainDiv, '-105px', '5');
     }
     if (holdingDetailsContainer && holdingsElement) {
         makeElementSticky(holdingDetailsContainer, '3px', '4');
