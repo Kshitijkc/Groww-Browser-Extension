@@ -153,6 +153,7 @@ const addPerformance = () => {
 
     if (rowElement) {
         addPerformanceElement(rowElement, className + ' max-diff', 'Max Diff(%)', maxDiffPercentage);
+        addElement('div', maxDiffPercentage, "lpu38Day bodyBaseHeavy contentPositive", "rgb(248, 231, 80)", stockLTPContainer);
     }
 }
 
@@ -213,6 +214,10 @@ const addContractDetails = async () => {
         addElement('div', content, "lpu38Day bodyBaseHeavy contentPositive", color, stockLTPContainer);
         if (websiteUrl) {
             addElement('a', "Website", "lpu38Day bodyBaseHeavy contentPositive", "rgb(80, 156, 248)", stockLTPContainer, { href: websiteUrl, target: "_blank" });
+        }
+        const maxBuyQty = jsonResponse["maxBuyQty"];
+        if (rowElement) {
+            addPerformanceElement(rowElement, className + ' max-buy-qty', 'Max-Buy(Qty)', maxBuyQty);
         }
         return jsonResponse;
     } catch (error) {
