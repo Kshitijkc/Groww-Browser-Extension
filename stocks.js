@@ -1,276 +1,213 @@
-const initializeElements = () => {
-    if (!htmlElement) {
-        htmlElement = document.documentElement;
-    }
-    if (!mainDiv) {
-        mainDiv = document.querySelector('div.lpu38MainDiv');
-    }
-    if (!holdingsElement) {
-        holdingsElement = document.querySelector('div.flex.width100.contentPrimary.yourHoldingsWithSIP_yh878HoldingDetails__Lq_oH');
-    }
-    if (!holdingDetailsContainer) {
-        holdingDetailsContainer = document.getElementsByClassName('cur-po contentPrimary borderPrimary width100 flex flex-column stockProduct_stkP12ProductPageMidSectionWrapper__vhPRw')[0];
-    }
-    if (!ltpElement) {
-        ltpElement = document.getElementsByClassName('lpu38Pri valign-wrapper false displayBase')[0].firstChild;
-    }
-    if (!highElement) {
-        const highElementParent = document.getElementsByClassName('pbar29Value bodyLarge')[1];
-        if (highElementParent) {
-            highElement = highElementParent.querySelector('span');
-        }
-    }
-    const parentElement = document.querySelector('.stockPerformance_dividerHz__hL82_').closest('.contentPrimary');
-    rowElement = parentElement.querySelector('.row');
-    const colDivs = rowElement.querySelectorAll('.col.l3');
-    colDivs.forEach(div => {
-        const keyElement = div.querySelector('.stockPerformance_keyText__f0fuN');
-        const valueElement = div.querySelector('.stockPerformance_value__g7yez');
-        if (keyElement && valueElement) {
-            const key = keyElement.textContent.trim();
-            const value = valueElement.textContent.trim();
-            namedElements[key] = valueElement;
-        }
-    });
-    if (!stockLTPContainer) {
-        stockLTPContainer = document.querySelector('.lpu38Pri.valign-wrapper.false.displayBase').parentElement;
-    }
-    if (!contentSecondaryContainer) {
-        contentSecondaryContainer = document.querySelector("div.valign-wrapper.contentSecondary.bodySmall");
-    }
-    let stickyNavContainer = document.getElementsByClassName('secondaryHeader_secondaryHeaderContainer__GUUMe secondaryHeader_pointerDisabled__gwEUo flex vspace-between flex-column')[0];
-    if (stickyNavContainer) {
-        stickyNavContainer.style.display = 'none';
-    }
-    stickyNavContainer = document.getElementsByClassName('secondaryHeader_secondaryHeaderContainer__GUUMe secondaryHeader_visible__lhvuo flex vspace-between flex-column')[0];
-    if (stickyNavContainer) {
-        stickyNavContainer.style.display = 'none';
-    }
-}
+const patternStocks = /^https:\/\/groww\.in\/stocks\/[^\/]+$/;
+const patternCharts = /^https:\/\/groww\.in\/charts\/stocks\/[^\/]+$/;
 
-const makeElementSticky = (element, top, zIndex) => {
-    const theme = htmlElement.getAttribute('data-theme');
-    element.style.position = 'sticky';
-    element.style.top = top;
-    element.style.zIndex = zIndex;
-    element.style.backgroundColor = theme === "dark" ? "rgba(18, 18, 18, 0.7)" : "rgba(255, 255, 255, 0.7)";
-}
+const currentUrl = window.location.href;
 
-const configureStickyElements = () => {
-    if (mainDiv) {
-        makeElementSticky(mainDiv, '-105px', '5');
-    }
-    if (holdingDetailsContainer && holdingsElement) {
-        makeElementSticky(holdingDetailsContainer, '3px', '4');
-    }
-}
+/* Stocks Order Card Handler */
 
-const addPerformanceElement = (rootElement, className, name, value) => {
-    const newDiv = document.createElement('div');
-    newDiv.className = `col l3 ${className.trim()}`;
-    newDiv.innerHTML = `
-        <div class="stockPerformance_keyText__f0fuN stockPerformance_keyTextStk__shi_y left-align bodyBase">${name}</div>
-        <span class="stockPerformance_value__g7yez bodyLargeHeavy">${value}</span>
-    `;
-    rootElement.appendChild(newDiv);
-}
+let priceObserver = null;
+let pageObserver = null;
+let isCalculatorAttached = false;
 
-const addOrUpdatePerformanceOnAmountChange = async (amount) => {
-    if (amount) {
-        await chrome.storage.local.set({ amount });
-    } else {
-        amount = amountElement.value;
-    }
-    const ltpValue = parseFloat(ltpElement.textContent.replace(/[₹,]/g, ''));
-    const qtyValue = parseInt(amount / ltpValue);
-    if (!quantityElement) {
-        quantityElement = document.createElement('div');
-        quantityElement.className = `bodySmall flex`;
-        quantityElement.style.marginLeft = '4px';
-        quantityElement.innerHTML = `
-            <span class="contentSecondary">QTY:</span>
-            <span style="margin-left: 3px;">${qtyValue}</span>
-        `;
-        contentSecondaryContainer.appendChild(quantityElement);
-    } else {
-        quantityElement.innerHTML = `
-            <span class="contentSecondary">QTY:</span>
-            <span style="margin-left: 3px;">${qtyValue}</span>
-        `;
-    }
-}
+const INPUT_ID = 'custom-amount-input';
+const OUTPUT_ID = 'custom-quantity-output';
 
-const addInputFields = async () => {
-    let default_amount = 20000;
+let currentPrice = 0;
+
+let amountInput = null;
+let quantityOutput = null;
+
+
+const updateQuantity = async () => {
+
+    if (!amountInput || !quantityOutput || !currentPrice) return;
+
+    const amount = parseFloat(amountInput.value);
+
+    const quantity = amount / currentPrice;
+
+    quantityOutput.textContent = `Qty: ${Math.floor(quantity)}`;
+
+    await chrome.storage.local.set({ amount });
+};
+
+const createCustomElements = async () => {
     const result = await chrome.storage.local.get(['amount']);
-    if (result.amount) {
-        default_amount = result.amount;
+    const defaultAmount = result.amount || 100000;
+
+    // ===== INPUT =====
+    const inputParent = document.querySelector(
+        '.width100.buySellOrder_bso21Head__SEipI.valign-wrapper.vspace-between'
+    );
+
+    if (inputParent && !document.getElementById(INPUT_ID)) {
+        const inputElement = document.createElement('input');
+        inputElement.id = INPUT_ID;
+        inputElement.className = 'buySellOrder_qtyinputbox__6bRuy bodyLargeHeavy contentPrimary borderPrimary';
+        inputElement.type = 'number';
+        inputElement.min = '1';
+        inputElement.value = defaultAmount;
+        inputElement.placeholder = 'Enter Amount';
+        inputElement.style.marginTop = '10px';
+
+        inputParent.appendChild(inputElement);
+
+        amountInput = document.getElementById(INPUT_ID);
+
+        amountInput.addEventListener('input', updateQuantity);
     }
-    amountElement = document.createElement("input");
-    amountElement.className = "buySellOrder_qtyinputbox__jMqei amount_input_box  bodyLargeHeavy contentPrimary borderPrimary";
-    amountElement.id = "inputAmount";
-    amountElement.type = "number";
-    amountElement.min = "1";
-    amountElement.value = default_amount;
-    amountElement.placeholder = "Amount"
-    amountElement.addEventListener('input', async (event) => {
-        await addOrUpdatePerformanceOnAmountChange(event.target.value);
-    });
-    const livePriceCard = document.querySelector('.width100.buySellOrder_bso21Head__4p9v2.valign-wrapper.vspace-between');
-    livePriceCard.appendChild(amountElement);
-}
 
-const addOrUpdatePerformanceOnLtpChange = async () => {
-    if (highElement) {
-        const highValue = parseFloat(highElement.textContent.replace(/,/g, ''));
-        const ltpValue = parseFloat(ltpElement.textContent.replace(/[₹,]/g, ''));
-        const ltpHighPercentageDiff = (((highValue - ltpValue) / ltpValue) * 100).toFixed(2);
+    // ===== OUTPUT =====
+    const outputParent = document.querySelector(
+        '.valign-wrapper.contentSecondary.bodySmall'
+    );
 
-        if (!performanceLtpHighValue) {
-            const ltpHighElement = document.querySelector('div.col.l3.extension.performance.ltp-high');
-            if (ltpHighElement) {
-                performanceLtpHighValue = ltpHighElement.querySelector('.stockPerformance_value__g7yez.bodyLargeHeavy');
-            }
+    if (outputParent && !document.getElementById(OUTPUT_ID)) {
+        const outputElement = document.createElement('span');
+        outputElement.id = OUTPUT_ID;
+        outputElement.style.margin = '0px 5px';
+
+        outputParent.appendChild(outputElement);
+
+        quantityOutput = document.getElementById(OUTPUT_ID);
+
+    }
+    console.log('Custom input and quantity output elements created');
+};
+
+const addQuantityCalculator = async () => {
+
+    const stockOrderCard = document.getElementById('stockOrderCard');
+
+    // If card removed/invisible -> cleanup
+    if (
+        !stockOrderCard ||
+        !document.body.contains(stockOrderCard) ||
+        stockOrderCard.offsetParent === null
+    ) {
+
+        if (priceObserver) {
+            priceObserver.disconnect();
+            priceObserver = null;
+            console.log('Price observer detached');
         }
 
-        if (rowElement) {
-            if (performanceLtpHighValue) {
-                performanceLtpHighValue.textContent = ltpHighPercentageDiff;
-            } else {
-                addPerformanceElement(rowElement, className + ' ltp-high', 'LTP-HIGH diff(%)', ltpHighPercentageDiff);
-            }
-        } else {
-            console.log('No div with class "row" found next to the divider.');
-        }
-    }
-    await addOrUpdatePerformanceOnAmountChange();
-}
-
-const addPerformance = () => {
-    const closeValue = parseFloat(namedElements['Prev. Close'].textContent.replace(/,/g, ''));
-    const upperValue = parseFloat(namedElements['Upper Circuit'].textContent.replace(/,/g, ''));
-    const maxDiffPercentage = (((upperValue - closeValue) / closeValue) * 100).toFixed(2);
-
-    if (rowElement) {
-        addPerformanceElement(rowElement, className + ' max-diff', 'Max Diff(%)', maxDiffPercentage);
-        addElement('div', maxDiffPercentage, "lpu38Day bodyBaseHeavy contentPositive", "rgb(248, 231, 80)", stockLTPContainer);
-    }
-}
-
-const scrollIntoView = () => {
-    const headingElement = document.querySelector("div.stkP12TabsDiv.bodyXLargeHeavy");
-    if (headingElement) {
-        headingElement.scrollIntoView({
-            behavior: 'smooth',
-            block: 'start'
-        });
-    } else {
-        console.log("Element not found");
-    }
-}
-
-const addElement = (elementType, content, className, color, container, attributes = {}) => {
-    const newElement = document.createElement(elementType);
-    newElement.className = className;
-    newElement.innerHTML = content;
-    newElement.style.color = color;
-    for (const key in attributes) {
-        newElement.setAttribute(key, attributes[key]);
-    }
-    container.appendChild(newElement);
-}
-
-const addContractDetails = async () => {
-    const scriptTag = document.getElementById('__NEXT_DATA__');
-    const data = JSON.parse(scriptTag.textContent);
-    const isNseTradable = data.props.pageProps.stockData.header.isNseTradable;
-    const isBseTradable = data.props.pageProps.stockData.header.isBseTradable;
-    const isin = data.props.pageProps.stockData.header.isin;
-    const websiteUrl = data.props.pageProps.stockData.details.websiteUrl;
-    let market = null;
-    if (isNseTradable) {
-        market = "NSE";
-    } else if (isBseTradable) {
-        market = "BSE";
-    }
-    if (market === null) {
-        console.log("The stock is not tradable on NSE or BSE.");
+        isCalculatorAttached = false;
         return;
     }
-    const url = `https://groww.in/v1/api/stocks/oms/rms/exchange/${market}/contract/${isin}/info`;
-    try {
-        const response = await fetch(url, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-        if (!response.ok) {
-            alert(`HTTP error! status: ${response.status}`);
+
+    // Prevent duplicate attachment
+    if (isCalculatorAttached) return;
+
+    const cardLivePrice = document.getElementById('card-live-price');
+
+    if (cardLivePrice) {
+
+        // First .bodySmall.flex element
+        const targetElement = cardLivePrice.querySelector('.bodySmall.flex');
+
+        if (targetElement) {
+
+            // Second span always contains price
+            const priceSpan = targetElement.querySelectorAll('span')[1];
+
+            if (!priceSpan) return;
+
+            const getAndUpdateQuantity = async () => {
+                const price = parseFloat(priceSpan.textContent
+                    .replace('₹', '')
+                    .trim());
+
+                currentPrice = price;
+
+                await updateQuantity();
+            };
+
+            // Create input/outputs and calculate initial quantity
+            await createCustomElements();
+            await getAndUpdateQuantity();
+
+            // Observe realtime price changes
+            priceObserver = new MutationObserver(async () => {
+                await getAndUpdateQuantity();
+            });
+
+            priceObserver.observe(priceSpan, {
+                childList: true,
+                subtree: true,
+                characterData: true
+            });
+
+            isCalculatorAttached = true;
+
+            console.log('Price observer attached');
+
+            // Listen for amount changes from storage (in case user has multiple tabs open)
+            chrome.storage.onChanged.addListener(async (changes, area) => {
+                if (area === 'local' && changes.amount) {
+                    const newAmount = changes.amount.newValue;
+                    if (amountInput) {
+                        amountInput.value = newAmount;
+                    }
+                    await updateQuantity();
+                }
+            });
         }
-        const jsonResponse = await response.json();
-        const content = jsonResponse["isT2t"] ? "T2T" : "Normal";
-        const color = jsonResponse["isT2t"] ? 'var(--red500)' : 'var(--green500)';
-        addElement('div', content, "lpu38Day bodyBaseHeavy contentPositive", color, stockLTPContainer);
-        if (websiteUrl) {
-            addElement('a', "Website", "lpu38Day bodyBaseHeavy contentPositive", "rgb(80, 156, 248)", stockLTPContainer, { href: websiteUrl, target: "_blank" });
-        }
-        const maxBuyQty = jsonResponse["maxBuyQty"];
-        if (rowElement) {
-            addPerformanceElement(rowElement, className + ' max-buy-qty', 'Max-Buy(Qty)', maxBuyQty);
-        }
-        return jsonResponse;
-    } catch (error) {
-        console.error('Error fetching stock details:', error);
     }
-}
+};
+
+const observeStockOrderCard = () => {
+
+    // Watch whole page for stockOrderCard add/remove
+    pageObserver = new MutationObserver(async () => {
+
+        const stockOrderCard = document.getElementById('stockOrderCard');
+
+        // If card appears
+        if (stockOrderCard && !isCalculatorAttached) {
+            await addQuantityCalculator();
+        }
+
+        // If card disappears
+        if (
+            (!stockOrderCard ||
+                !document.body.contains(stockOrderCard) ||
+                stockOrderCard.offsetParent === null)
+            && isCalculatorAttached
+        ) {
+
+            if (priceObserver) {
+                priceObserver.disconnect();
+                priceObserver = null;
+            }
+
+            isCalculatorAttached = false;
+
+            console.log('Price observer detached');
+        }
+    });
+
+    pageObserver.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
+};
 
 const main = async () => {
-    initializeElements();
-    configureStickyElements();
-    await addInputFields();
-    await addOrUpdatePerformanceOnLtpChange();
-    addPerformance();
-    scrollIntoView();
-    addContractDetails();
-    const observer1 = new MutationObserver(async () => {
-        await addOrUpdatePerformanceOnLtpChange();
-    });
-    const config1 = {
-        characterData: true,
-        subtree: true 
-    };
-    observer1.observe(ltpElement, config1);
-    const observer2 = new MutationObserver(async () => {
-        configureStickyElements();
-    });
-    const config2 = {
-        attributes: true,
-        attributeFilter: ['data-theme']
-    };
-    observer2.observe(htmlElement, config2);
-}
 
-// Define the regular expression pattern
-const pattern = /^https:\/\/groww\.in\/stocks\/[^\/]+$/;
-// Get the current URL
-const currentUrl = window.location.href;
-// Check if the current URL matches the pattern
-if (pattern.test(currentUrl)) {
-    var mainDiv = null;
-    var holdingsElement = null;
-    var holdingDetailsContainer = null;
-    var ltpElement = null;
-    var highElement = null;
-    var rowElement = null;
-    var performanceLtpHighValue = null;
-    var namedElements = {};
-    var stockLTPContainer = null;
-    var htmlElement = null;
-    var className = 'extension performance';
-    var amountElement = null;
-    var quantityElement = null;
-    var contentSecondaryContainer = null;
-    var stickyNavContainer = null;
-    window.onload = setTimeout(main, 3000);
+    // Stocks page -> directly attach
+    if (patternStocks.test(currentUrl)) {
+        await addQuantityCalculator();
+    }
+
+    // Charts page -> wait for dynamic stockOrderCard
+    if (patternCharts.test(currentUrl)) {
+        observeStockOrderCard();
+    }
+};
+
+if (patternStocks.test(currentUrl) || patternCharts.test(currentUrl)) {
+    window.onload = () => {
+        setTimeout(main, 1000);
+    };
 }

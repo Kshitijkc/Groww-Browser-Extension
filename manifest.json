@@ -9,7 +9,7 @@
   "content_scripts": [
     {
       "js": ["stocks.js"],
-      "matches": ["https://groww.in/stocks/*"]
+      "matches": ["https://groww.in/stocks/*", "https://groww.in/charts/stocks/*"]
     }
   ],
   "icons": {
