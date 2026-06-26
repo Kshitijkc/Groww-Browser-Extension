@@ -193,11 +193,62 @@ const observeStockOrderCard = () => {
     });
 };
 
+/* Stock Page Handler */
+let stockPage = null;
+let productHeader = null;
+let stockGraph = null;
+
+const makeElementsSticky = async () => {
+    const theme = stockPage.getAttribute('data-theme');
+
+    if (productHeader) {
+        productHeader.style.position = 'sticky';
+        productHeader.style.top = '0px';
+        productHeader.style.zIndex = '450';
+        productHeader.style.backgroundColor = theme === "dark" ? "rgba(18, 18, 18, 0.7)" : "rgba(255, 255, 255, 0.7)";
+    }
+
+    if (stockGraph) {
+        stockGraph.style.position = 'sticky';
+        stockGraph.style.top = '0px';
+        stockGraph.style.zIndex = '500';
+        stockGraph.style.backgroundColor = theme === "dark" ? "rgba(18, 18, 18, 0.7)" : "rgba(255, 255, 255, 0.7)";
+    }
+}
+
+const stockPageHandler = async () => {
+    stockPage = document.documentElement;
+    const mainHeader = document.getElementsByClassName('secondaryHeader_secondaryHeaderContainer__1KSe4 secondaryHeader_hiddenHeader__OUvr2 secondaryHeader_pointerDisabled__FaL3W flex vspace-between flex-column')[0] || 
+        document.getElementsByClassName('secondaryHeader_secondaryHeaderContainer__1KSe4 secondaryHeader_visible__QJWtc flex vspace-between flex-column')[0];
+    productHeader = document.getElementsByClassName('flex flex-column instrumentProductHeader_root__1swws')[0].parentElement;
+    stockGraph = document.getElementById('stockGraph');
+
+    mainHeader.style.position = 'static';
+
+    await makeElementsSticky();
+
+    stockGraph.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+    });
+
+    const themeObserver = new MutationObserver(async () => {
+        await makeElementsSticky();
+    });
+    const themeObserverConfig = {
+        attributes: true,
+        attributeFilter: ['data-theme']
+    };
+    themeObserver.observe(stockPage, themeObserverConfig);
+    console.log('Theme observer attached');
+}
+
 const main = async () => {
 
     // Stocks page -> directly attach
     if (patternStocks.test(currentUrl)) {
         await addQuantityCalculator();
+        await stockPageHandler();
     }
 
     // Charts page -> wait for dynamic stockOrderCard
@@ -208,6 +259,6 @@ const main = async () => {
 
 if (patternStocks.test(currentUrl) || patternCharts.test(currentUrl)) {
     window.onload = () => {
-        setTimeout(main, 1000);
+        setTimeout(main, 2000);
     };
 }
