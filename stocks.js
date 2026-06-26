@@ -1,5 +1,5 @@
-const patternStocks = /^https:\/\/groww\.in\/stocks\/[^\/]+$/;
-const patternCharts = /^https:\/\/groww\.in\/charts\/stocks\/[^\/]+$/;
+const patternStocks = /^https:\/\/groww\.in\/stocks\/.+$/;
+const patternCharts = /^https:\/\/groww\.in\/charts\/.+$/;
 
 const currentUrl = window.location.href;
 
