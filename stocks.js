@@ -259,6 +259,6 @@ const main = async () => {
 
 if (patternStocks.test(currentUrl) || patternCharts.test(currentUrl)) {
     window.onload = () => {
-        setTimeout(main, 2000);
+        setTimeout(main, 1000);
     };
 }
