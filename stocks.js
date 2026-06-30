@@ -210,7 +210,7 @@ const makeElementsSticky = async () => {
 
     if (stockGraph) {
         stockGraph.style.position = 'sticky';
-        stockGraph.style.top = '0px';
+        stockGraph.style.top = '30px';
         stockGraph.style.zIndex = '500';
         stockGraph.style.backgroundColor = theme === "dark" ? "rgba(18, 18, 18, 0.7)" : "rgba(255, 255, 255, 0.7)";
     }
